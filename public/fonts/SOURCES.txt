@@ -28,7 +28,7 @@ Downloaded: 2026-11-20
 File: noto-serif-sc-han-variable.woff2
 Style: normal
 Variable weight range: 400-600
-Subset: 407 unique Han characters extracted from src/App.tsx, src/content.ts and src/catalog.ts
+Subset: 410 unique Han characters extracted from src/App.tsx, src/content.ts and src/catalog.ts
 License: SIL Open Font License 1.1
 Copyright: 2012 Google Inc. All Rights Reserved.
 

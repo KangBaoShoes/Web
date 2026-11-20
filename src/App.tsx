@@ -19,6 +19,7 @@ import {
   type Language,
   type Product,
 } from "./content";
+import { createEmailDraftLink } from "./contact";
 
 function Arrow({
   diagonal = false,
@@ -57,22 +58,23 @@ function BrandMonogram({ className = "" }: { className?: string }) {
   );
 }
 
-function ContactPhone({
+function ContactWhatsApp({
   lang,
   className = "",
 }: {
   lang: Language;
   className?: string;
 }) {
-  const label = lang === "zh" ? "联系电话" : "Call us";
   return (
     <a
       className={`phone-link ${className}`}
-      href={brand.phoneHref}
-      aria-label={`${label}: ${brand.phone}`}
+      href={brand.whatsappHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${lang === "zh" ? "通过 WhatsApp 联系" : "Contact us on WhatsApp"}: ${brand.whatsappNumber}`}
     >
-      <span className="phone-label">{label}</span>
-      <span className="phone-number">{brand.phone}</span>
+      <span className="phone-label">WhatsApp:</span>
+      <span className="phone-number">{brand.whatsappNumber}</span>
       <Arrow diagonal />
     </a>
   );
@@ -140,7 +142,12 @@ function Inquiry({
   const isZh = lang === "zh";
   const [summary, setSummary] = useState("");
   const [saved, setSaved] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
   const resultHeading = useRef<HTMLParagraphElement>(null);
+  const emailSubject = `${brand.name} — ${isZh ? "合作咨询" : "Partnership enquiry"}${product ? ` / ${product.code}` : ""}`;
+  const emailLink = createEmailDraftLink(brand.email, emailSubject, summary);
 
   useEffect(() => {
     if (summary) resultHeading.current?.focus();
@@ -173,7 +180,7 @@ function Inquiry({
     }
     setSummary(
       [
-        `${brand.name} — ${isZh ? "合作需求清单" : "Project brief"}`,
+        `${brand.name} — ${isZh ? "合作咨询" : "Partnership enquiry"}`,
         "────────────────────────────",
         `${isZh ? "联系人" : "Name"}: ${String(form.get("name")).trim()}`,
         `${isZh ? "品牌 / 公司" : "Brand / company"}: ${String(form.get("company")).trim() || "—"}`,
@@ -190,13 +197,11 @@ function Inquiry({
         isZh ? "需求说明：" : "Project details:",
         String(form.get("message")).trim(),
         "",
-        `${isZh ? "联系电话" : "Contact phone"}: ${brand.phone}`,
-        isZh
-          ? `此清单由您自行保存，尚未发送给${brand.chineseName}。`
-          : `This brief is saved by you and has not been sent to ${brand.name}.`,
+        `${brand.name} WhatsApp: ${brand.whatsappNumber}`,
       ].join("\n"),
     );
     setSaved(false);
+    setCopyStatus("idle");
   }
 
   function download() {
@@ -209,6 +214,15 @@ function Inquiry({
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     setSaved(true);
+  }
+
+  async function copyDraft() {
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("failed");
+    }
   }
 
   return (
@@ -224,13 +238,17 @@ function Inquiry({
             ? "好的作品，始于对话。"
             : "Every good thing begins with a conversation."}
         </h2>
-        <ContactPhone lang={lang} className="inquiry-phone" />
+        <ContactWhatsApp lang={lang} className="inquiry-phone" />
+        <p className="inquiry-recipient">
+          {isZh ? "收件邮箱" : "Send your enquiry to"}
+          <a href={`mailto:${brand.email}`}>{brand.email}</a>
+        </p>
         {!summary ? (
           <>
             <p className="muted form-intro">
               {isZh
-                ? "聊聊您的品牌与构想，整理一份专属合作需求清单。"
-                : "Tell us about your brand and your ideas. Put together a brief for your next collection."}
+                ? "聊聊您的品牌与构想。填写后预览邮件草稿，再打开邮件应用确认发送。"
+                : "Tell us about your brand and ideas. Review your email draft, then open your email app to send it."}
             </p>
             {product && (
               <p className="selected-product">
@@ -320,14 +338,14 @@ function Inquiry({
               </label>
               <p className="form-note">
                 {isZh
-                  ? "信息仅用于生成您可下载的清单，不会自动发送。"
-                  : "Your information is used to create a downloadable brief. Nothing is sent automatically."}
+                  ? "内容在此页面内生成。打开邮件应用后，请由您检查并点击发送；网站不会自动发送邮件。"
+                  : "Your draft is prepared on this page. Review it and press Send in your email app. This website does not send email automatically."}
               </p>
               <button
                 className="button button-burgundy form-submit"
                 type="submit"
               >
-                {isZh ? "生成合作需求清单" : "Prepare my project brief"}
+                {isZh ? "预览邮件草稿" : "Review email draft"}
                 <Arrow />
               </button>
             </form>
@@ -336,20 +354,48 @@ function Inquiry({
           <div className="brief-result" aria-live="polite">
             <p ref={resultHeading} tabIndex={-1}>
               {isZh
-                ? "您的需求清单已准备就绪。下载保存后，可通过您与工厂约定的联系方式分享；当前尚未发送。"
-                : "Your brief is ready to save. Share it through your agreed contact channel with the factory. It has not been sent."}
+                ? "邮件草稿已准备好，尚未发送。点击下方按钮，在您的邮件应用中确认发送。"
+                : "Your email draft is ready and has not been sent. Open your email app below, review the message and press Send."}
+            </p>
+            <p className="email-subject">
+              <strong>{isZh ? "主题：" : "Subject: "}</strong>
+              {emailSubject}
             </p>
             <pre tabIndex={0}>{summary}</pre>
-            <button className="button button-burgundy" onClick={download}>
-              {isZh ? "下载需求清单" : "Download brief"}
+            <a className="button button-burgundy email-send" href={emailLink}>
+              {isZh ? "打开邮件应用发送" : "Open email app to send"}
               <Arrow />
-            </button>
-            <button
-              className="text-link edit-brief"
-              onClick={() => setSummary("")}
-            >
-              {isZh ? "重新填写" : "Start again"}
-            </button>
+            </a>
+            <p className="email-fallback">
+              {isZh
+                ? "如果邮件应用未打开，或草稿内容不完整，请复制或下载内容，手动发送到上方邮箱。"
+                : "If your email app does not open or the draft is incomplete, copy or download the message and send it to the address above."}
+            </p>
+            <div className="draft-actions">
+              <button className="text-link" onClick={copyDraft}>
+                {isZh ? "复制邮件内容" : "Copy message"}
+              </button>
+              <button className="text-link" onClick={download}>
+                {isZh ? "下载需求清单" : "Download brief"}
+              </button>
+              <button
+                className="text-link edit-brief"
+                onClick={() => setSummary("")}
+              >
+                {isZh ? "重新填写" : "Start again"}
+              </button>
+            </div>
+            {copyStatus !== "idle" && (
+              <p className="copy-status" role="status">
+                {copyStatus === "copied"
+                  ? isZh
+                    ? "邮件内容已复制。"
+                    : "Message copied."
+                  : isZh
+                    ? "无法自动复制，请选中上方草稿文字复制，或下载清单。"
+                    : "Copy is unavailable. Select and copy the draft above, or download the brief."}
+              </p>
+            )}
             {saved && (
               <p className="download-status" role="status">
                 {isZh
@@ -963,7 +1009,7 @@ export default function App() {
                 {t("开启合作对话", "Start a conversation")}
                 <Arrow />
               </button>
-              <ContactPhone lang={lang} className="cooperation-phone" />
+              <ContactWhatsApp lang={lang} className="cooperation-phone" />
               <p className="cooperation-note">
                 {t(
                   "每一份构想，都值得被认真对待。",
@@ -1002,7 +1048,10 @@ export default function App() {
           </div>
           <div className="footer-links">
             <p>{t("保持联系", "LET’S CONNECT")}</p>
-            <ContactPhone lang={lang} className="footer-phone" />
+            <ContactWhatsApp lang={lang} className="footer-phone" />
+            <a className="footer-email" href={`mailto:${brand.email}`}>
+              {brand.email}
+            </a>
             <button onClick={() => setInquiry({ product: null })}>
               {t("商务合作", "Business enquiries")}
               <Arrow diagonal />
@@ -1114,8 +1163,8 @@ export default function App() {
             <h2>{t("隐私说明", "A note on privacy")}</h2>
             <p>
               {t(
-                "合作需求表填写的信息仅在当前页面内用于生成清单，不会上传或发送。页面关闭后，表单内容不会被保留。下载的需求清单由您自行保存和分享。",
-                "Information entered in the enquiry form is used only on this page to generate your brief. It is not uploaded or sent. Form contents are not retained after the page is closed. Downloaded briefs are saved and shared at your discretion.",
+                `合作需求表在当前页面内生成邮件草稿，不会自动上传或发送。点击打开邮件应用时，收件人、主题与填写的内容会交给您的邮件应用，由您确认发送到 ${brand.email}。关闭页面后不保留表单内容；复制和下载的内容由您自行保存和分享。点击 WhatsApp 链接会打开 WhatsApp 服务。`,
+                `The enquiry form prepares a draft on this page without uploading or sending it automatically. Opening the email app passes the recipient, subject and your message to your email application, where you confirm sending to ${brand.email}. Form contents are not retained when this page closes. You control copied or downloaded content. WhatsApp links open the WhatsApp service.`,
               )}
             </p>
             <p>

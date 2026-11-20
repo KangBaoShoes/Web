@@ -2476,3 +2476,70 @@ html[lang="zh-CN"] .directory-title h3 {
     font-size: 20px;
   }
 }
+
+/* Contact options and the visitor-confirmed email draft. */
+.inquiry-recipient {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  color: #81735f;
+  font-size: 11px;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+.inquiry-recipient a {
+  color: var(--wine);
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.brief-result > .email-subject {
+  margin-top: 16px;
+  font-size: 11px;
+}
+.email-send {
+  width: 100%;
+}
+.brief-result > .email-fallback {
+  margin: 17px 0 20px;
+  font-size: 10px;
+  line-height: 1.9;
+}
+.draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 25px;
+}
+.draft-actions .edit-brief {
+  margin-left: 0;
+}
+.copy-status {
+  margin-top: 17px;
+}
+.footer-links > .footer-email {
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+  max-width: 100%;
+}
+.footer-links {
+  min-width: 0;
+}
+@media (max-width: 380px) {
+  .inquiry-phone {
+    gap: 7px;
+    letter-spacing: 0.4px;
+    font-size: 10px;
+  }
+  .inquiry-phone .phone-label {
+    font-size: 9px;
+  }
+  .story-cooperation .cooperation-phone {
+    font-size: 15px;
+    gap: 9px;
+  }
+  .footer-links > .footer-phone {
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+}

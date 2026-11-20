@@ -13,8 +13,9 @@ export const brand = {
   chineseName: "康宝鞋业",
   logo: "brand/kangbao-pdf-logo.png",
   line: "THE ART OF SHOEMAKING",
-  phone: "18968893710",
-  phoneHref: "tel:+8618968893710",
+  whatsappNumber: "+86 18968893710",
+  whatsappHref: "https://wa.me/8618968893710",
+  email: "aabbccll895@gmail.com",
 };
 export const asset = (file: string) =>
   `${import.meta.env.BASE_URL}images/${file}`;

@@ -26,7 +26,7 @@
     U+2215, U+FEFF, U+FFFD;
 }
 
-/* Noto Serif SC — 407 Han characters used by App.tsx, content.ts and catalog.ts.
+/* Noto Serif SC — 410 Han characters used by App.tsx, content.ts and catalog.ts.
    Regenerate this subset and unicode-range when adding new Chinese copy. */
 @font-face {
   font-family: "Noto Serif SC";
