@@ -1,0 +1,17 @@
+node_modules/
+dist/
+releases/
+artifacts/
+tmp/
+鞋子图片/
+.npm-cache/
+*.local
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.tsbuildinfo
